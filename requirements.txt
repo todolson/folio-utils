@@ -1,2 +1,3 @@
-requests
-FolioClient
+mypy
+# requests >= 2.32
+FolioClient >= 1.0

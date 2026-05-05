@@ -67,10 +67,10 @@ def init_client(config):
         config: ConfigParser object contianing config file data
     """
     return FolioClient(
-        config["Okapi"]["okapi_url"],
-        config["Okapi"]["tenant_id"],
-        config["Okapi"]["username"],
-        config["Okapi"]["password"],
+        config["DEFAULT"]["gateway_url"],
+        config["DEFAULT"]["tenant_id"],
+        config["DEFAULT"]["username"],
+        config["DEFAULT"]["password"],
     )
 
 
@@ -244,7 +244,7 @@ def set_pol_fund(
         Tuple of HTTP status code, plus message and original fund distribution list if error.
     """
     pol_path = f"/orders/order-lines/{pol['id']}"
-    pol_url = f"{client.okapi_url}/orders/order-lines/{pol['id']}"
+    pol_url = f"{client.gateway_url}/orders/order-lines/{pol['id']}"
 
     # TODO: release old encumbrances
 
@@ -269,7 +269,7 @@ def set_pol_fund(
         err_fp.write("updated POL fund dist:\n")
         json.dump(pol["fundDistribution"], err_fp, indent=2)
         err_fp.write("\nEND updated POL fund dist:\n")
-    resp = requests.put(pol_url, headers=client.okapi_headers, data=json.dumps(pol))
+    resp = requests.put(pol_url, headers=client.folio_headers, data=json.dumps(pol))
 
     if verbose:
         err_fp.write(pol_url + "\n")
@@ -302,7 +302,7 @@ def reset_fund_dist(
     for fdist in fundDist:
         # release current encumbrance
         release_url = f"/finance/release-encumbrance/{fdist['encumbrance']}"
-        r = requests.post(release_url, headers=client.okapi_headers)
+        r = requests.post(release_url, headers=client.folio_headers)
         status_code = r.status_code
         msg = r.text
         if status_code != "204":
@@ -424,9 +424,9 @@ def main_loop(client, in_csv, out_csv, verbose: bool, err_fp):
             continue
         for enc in enc_list:
             resp = requests.post(
-                client.okapi_url + f"/finance/release-encumbrance/{enc['id']}",
+                client.gateway_url + f"/finance/release-encumbrance/{enc['id']}",
                 json={"id": enc["id"]},
-                headers=client.okapi_headers,
+                headers=client.folio_headers,
             )
             if resp.status_code != 204:
                 out_csv.writerow(
