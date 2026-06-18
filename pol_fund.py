@@ -34,7 +34,7 @@ import uuid
 from datetime import date, datetime, timezone
 
 import requests
-from folioclient import FolioClient
+from folioclient import FolioClient, FolioNetworkError
 from folioclient.FolioClient import FolioClient
 
 
@@ -277,11 +277,14 @@ def set_pol_fund(
         err_fp.write(pol_url + "\n")
 
     # Check updated POL...
-    updated_pol = client.folio_get(pol_path)
-    if verbose:
-        err_fp.write("updated POL fund dist:\n")
-        json.dump(updated_pol["fundDistribution"], err_fp, indent=2)
-        err_fp.write("\nEND updated POL fund dist:\n")
+    try:
+        updated_pol = client.folio_get(pol_path)
+        if verbose:
+            err_fp.write("updated POL fund dist:\n")
+            json.dump(updated_pol["fundDistribution"], err_fp, indent=2)
+            err_fp.write("\nEND updated POL fund dist:\n")
+    except FolioNetworkError as ne:
+        err_fp.write(f'ERROR checking updated POL {pol["poLineNumber"]}: {ne}')
 
     # ... and return the update results if the check is good
 
