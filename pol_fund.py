@@ -491,6 +491,10 @@ def main():
         "original_fund_distribution",
         "manual_review",
     ]
+
+    # configure outfile for use as a CSV writer, assumed to be a TextIOWrapper
+    args.outfile.reconfigure(newline='', line_buffering=True)
+
     main_loop(
         client,
         csv.reader(args.infile, dialect=args.in_dialect),
